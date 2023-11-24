@@ -1,0 +1,73 @@
+#!/bin/bash
+
+AUTO_INSTALLED_PACKAGE_LIST_FILE=/var/lib/zypp/AutoInstalled
+
+output_unneeded_packages() {
+  local -r data=`zypper packages --unneeded 2>&1`
+  local landmark_line_number=`
+    echo "$data" | grep -n '^S | Repository' | cut -d : -f 1`
+  if [ -z "$landmark_line_number" ]; then return; fi
+  echo "$data" | tail -n +$((landmark_line_number+2)) | cut -d '|' -f 3;}
+
+execute_autoremove() {
+  local unneeded_packages=`output_unneeded_packages`
+  if [ -z "$unneeded_packages" ]; then
+    echo nothing to do;
+    exit 0; fi
+  zypper remove --clean-deps $unneeded_packages;}
+
+exit_because_no_packages_to_act_on() {
+  echo error: no packages specified
+  exit 1;}
+
+execute_mark_manually_installed() {
+  if [ $# = 0 ]; then exit_because_no_packages_to_act_on; fi
+  local auto_installed_package_list=`cat $AUTO_INSTALLED_PACKAGE_LIST_FILE`
+  local package_name
+  for package_name in "$@"; do
+    auto_installed_package_list=`
+      echo "$auto_installed_package_list" | grep -v "^${package_name}$"`; done
+  echo "$auto_installed_package_list" > $AUTO_INSTALLED_PACKAGE_LIST_FILE;}
+
+package_marked_automatically_installed() {
+  grep "^${1}$" $AUTO_INSTALLED_PACKAGE_LIST_FILE >/dev/null;}
+
+execute_mark_automatically_installed() {
+  if [ $# = 0 ]; then exit_because_no_packages_to_act_on; fi
+  local packages_to_mark=
+  local package_name
+  for package_name in "$@"; do
+    if ! package_marked_automatically_installed $package_name; then
+      packages_to_mark="$packages_to_mark $package_name"; fi; done
+  # Astute readers may be wondering what would happen here if the user passed in
+  # the names of some non-existent or currently uninstalled packages and what we
+  # do to guard against this? Happily it turns out we don't have to do anything.
+  # When we did tests that inserted such names into the file whether manually or
+  # with this subcommand the file was temporarily "corrupted" but then some kind
+  # of other automated repair process that Zypper has when it executes
+  # operations touching the AutoInstalled file removes the offending entries and
+  # even re-sorts the entries back into alphabetical order.
+  if [ -n "$packages_to_mark" ]; then
+    echo $packages_to_mark | sed 's/^ //' | tr " " "\n" \
+      >> $AUTO_INSTALLED_PACKAGE_LIST_FILE; fi;}
+
+USAGES='
+USAGES:
+1) zypper-unjammed autoremove
+2) zypper-unjammed mark-manually-installed <package> <names> <here>
+3) zypper-unjammed mark-automatically-installed <package> <names> <here>
+'
+
+main() {
+  local -r operation="$1"
+  shift
+  if [ "$operation" = autoremove ]; then
+    execute_autoremove
+  elif [ "$operation" = mark-manually-installed ]; then
+    execute_mark_manually_installed "$@"
+  elif [ "$operation" = mark-automatically-installed ]; then
+    execute_mark_automatically_installed "$@"
+  else
+    echo "$USAGES"; fi;}
+
+main "$@"
