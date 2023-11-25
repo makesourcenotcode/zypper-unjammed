@@ -6,7 +6,7 @@ reasons as automatic or manual.
 
 === VERSION ===
 
-1.0.0
+1.1.1
 
 === MOTIVATION ===
 
@@ -136,6 +136,8 @@ While we do a reasonably good job of attaining this tools espoused goals sadly
 there are limits to what can be built atop literal quicksand.
 
 === CHANGELOG ===
+
+v1.1.1: minor documentation fix
 
 v1.1.0: added support for conservative autoremoval variants
 
