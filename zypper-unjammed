@@ -9,12 +9,24 @@ output_unneeded_packages() {
   if [ -z "$landmark_line_number" ]; then return; fi
   echo "$data" | tail -n +$((landmark_line_number+2)) | cut -d '|' -f 3;}
 
+exit_because_nothing_to_do() {
+  echo nothing to do
+  exit 0;}
+
 execute_autoremove() {
   local unneeded_packages=`output_unneeded_packages`
-  if [ -z "$unneeded_packages" ]; then
-    echo nothing to do;
-    exit 0; fi
+  if [ -z "$unneeded_packages" ]; then exit_because_nothing_to_do; fi
   zypper remove --clean-deps $unneeded_packages;}
+
+execute_conservative_breadth_first_autoremove() {
+  local unneeded_packages=`output_unneeded_packages`
+  if [ -z "$unneeded_packages" ]; then exit_because_nothing_to_do; fi
+  zypper remove --no-clean-deps $unneeded_packages;}
+
+execute_conservative_depth_first_autoremove() {
+  local unneeded_packages=`output_unneeded_packages`
+  if [ -z "$unneeded_packages" ]; then exit_because_nothing_to_do; fi
+  zypper remove --clean-deps `echo "$unneeded_packages" | shuf -n 1`;}
 
 exit_because_no_packages_to_act_on() {
   echo error: no packages specified
@@ -53,9 +65,13 @@ execute_mark_automatically_installed() {
 
 USAGES='
 USAGES:
-1) zypper-unjammed autoremove
-2) zypper-unjammed mark-manually-installed <package> <names> <here>
-3) zypper-unjammed mark-automatically-installed <package> <names> <here>
+
+zypper-unjammed autoremove
+zypper-unjammed conservative-breadth-first-autoremove
+zypper-unjammed conservative-depth-first-autoremove
+
+zypper-unjammed mark-manually-installed <package> <names> <here>
+zypper-unjammed mark-automatically-installed <package> <names> <here>
 '
 
 main() {
@@ -63,6 +79,10 @@ main() {
   shift
   if [ "$operation" = autoremove ]; then
     execute_autoremove
+  elif [ "$operation" = conservative-breadth-first-autoremove ]; then
+    execute_conservative_breadth_first_autoremove
+  elif [ "$operation" = conservative-depth-first-autoremove ]; then
+    execute_conservative_depth_first_autoremove
   elif [ "$operation" = mark-manually-installed ]; then
     execute_mark_manually_installed "$@"
   elif [ "$operation" = mark-automatically-installed ]; then
