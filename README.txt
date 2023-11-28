@@ -6,7 +6,7 @@ reasons as automatic or manual.
 
 === VERSION ===
 
-1.1.1
+1.1.2
 
 === MOTIVATION ===
 
@@ -132,13 +132,12 @@ dependencies shouldn't have changed and that there were no other packages
 installed in the interim which share dependencies with leafpad this is clearly
 erroneous.
 
-While we do a reasonably good job of attaining this tools espoused goals sadly
+While we do a reasonably good job of attaining this tool's espoused goals sadly
 there are limits to what can be built atop literal quicksand.
 
 === CHANGELOG ===
 
+v1.1.2: improved portability
 v1.1.1: minor documentation fix
-
 v1.1.0: added support for conservative autoremoval variants
-
 v1.0.0: implemented base functionality

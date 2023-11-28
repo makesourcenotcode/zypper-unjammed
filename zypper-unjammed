@@ -1,53 +1,51 @@
-#!/bin/bash
+#!/bin/sh
 
 AUTO_INSTALLED_PACKAGE_LIST_FILE=/var/lib/zypp/AutoInstalled
 
-output_unneeded_packages() {
-  local -r data=`zypper packages --unneeded 2>&1`
-  local landmark_line_number=`
+output_unneeded_packages(){
+  data=`zypper packages --unneeded 2>&1`
+  landmark_line_number=`
     echo "$data" | grep -n '^S | Repository' | cut -d : -f 1`
   if [ -z "$landmark_line_number" ]; then return; fi
   echo "$data" | tail -n +$((landmark_line_number+2)) | cut -d '|' -f 3;}
 
-exit_because_nothing_to_do() {
+exit_because_nothing_to_do(){
   echo nothing to do
   exit 0;}
 
-execute_autoremove() {
-  local unneeded_packages=`output_unneeded_packages`
+execute_autoremove(){
+  unneeded_packages=`output_unneeded_packages`
   if [ -z "$unneeded_packages" ]; then exit_because_nothing_to_do; fi
   zypper remove --clean-deps $unneeded_packages;}
 
-execute_conservative_breadth_first_autoremove() {
-  local unneeded_packages=`output_unneeded_packages`
+execute_conservative_breadth_first_autoremove(){
+  unneeded_packages=`output_unneeded_packages`
   if [ -z "$unneeded_packages" ]; then exit_because_nothing_to_do; fi
   zypper remove --no-clean-deps $unneeded_packages;}
 
-execute_conservative_depth_first_autoremove() {
-  local unneeded_packages=`output_unneeded_packages`
+execute_conservative_depth_first_autoremove(){
+  unneeded_packages=`output_unneeded_packages`
   if [ -z "$unneeded_packages" ]; then exit_because_nothing_to_do; fi
   zypper remove --clean-deps `echo "$unneeded_packages" | shuf -n 1`;}
 
-exit_because_no_packages_to_act_on() {
+exit_because_no_packages_to_act_on(){
   echo error: no packages specified
   exit 1;}
 
-execute_mark_manually_installed() {
+execute_mark_manually_installed(){
   if [ $# = 0 ]; then exit_because_no_packages_to_act_on; fi
-  local auto_installed_package_list=`cat $AUTO_INSTALLED_PACKAGE_LIST_FILE`
-  local package_name
+  auto_installed_package_list=`cat $AUTO_INSTALLED_PACKAGE_LIST_FILE`
   for package_name in "$@"; do
     auto_installed_package_list=`
       echo "$auto_installed_package_list" | grep -v "^${package_name}$"`; done
   echo "$auto_installed_package_list" > $AUTO_INSTALLED_PACKAGE_LIST_FILE;}
 
-package_marked_automatically_installed() {
+package_marked_automatically_installed(){
   grep "^${1}$" $AUTO_INSTALLED_PACKAGE_LIST_FILE >/dev/null;}
 
-execute_mark_automatically_installed() {
+execute_mark_automatically_installed(){
   if [ $# = 0 ]; then exit_because_no_packages_to_act_on; fi
-  local packages_to_mark=
-  local package_name
+  packages_to_mark=
   for package_name in "$@"; do
     if ! package_marked_automatically_installed $package_name; then
       packages_to_mark="$packages_to_mark $package_name"; fi; done
@@ -75,7 +73,7 @@ zypper-unjammed mark-automatically-installed <package> <names> <here>
 '
 
 main() {
-  local -r operation="$1"
+  operation="$1"
   shift
   if [ "$operation" = autoremove ]; then
     execute_autoremove
