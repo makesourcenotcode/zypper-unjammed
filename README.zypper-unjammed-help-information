@@ -1,12 +1,10 @@
 === SUMMARY ===
 
+version: 1.1.3
+
 Brings package management with Zypper into the 21st Century by providing an
 autoremove command as well as facilities for marking package installation
 reasons as automatic or manual.
-
-=== VERSION ===
-
-1.1.2
 
 === MOTIVATION ===
 
@@ -59,15 +57,16 @@ approve. In rare cases you may need/want to use hybrids of these techniques.
 
 === LICENSE ===
 
-This is a Freedom Respecting Technology: think Open Source but not only for well
-off people with reliable Internet access. Learn more at:
+This is a Freedom Respecting Technology, think Open Source for everyone, not
+just well off people with reliable Internet access. Learn more at:
 https://makesourcenotcode.github.io/freedom_respecting_technology.html
 
 It's (admittedly small) Open Knowledge Set consists of:
-* the main program source/executable file zypper-unjammed
-  licensed under GNU GPL v3 ( https://www.gnu.org/licenses/gpl-3.0.txt )
-* the documentation / Help Information Set consisting of this file
-  licensed under GNU FDL v1.3 ( https://www.gnu.org/licenses/fdl-1.3.txt )
+* the main program source file / executable file zypper-unjammed licensed under
+  GNU GPL v3 ( https://www.gnu.org/licenses/gpl-3.0.txt )
+* the source / built form of the documentation / Help Information Set consisting
+  of this README.zypper-unjammed-help-information file licensed under
+  GNU FDL v1.3 ( https://www.gnu.org/licenses/fdl-1.3.txt )
 
 === DEVELOPMENT NOTES ===
 
@@ -137,6 +136,7 @@ there are limits to what can be built atop literal quicksand.
 
 === CHANGELOG ===
 
+v1.1.3: improved documentation
 v1.1.2: improved portability
 v1.1.1: minor documentation fix
 v1.1.0: added support for conservative autoremoval variants
